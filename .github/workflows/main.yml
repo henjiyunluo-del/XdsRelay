@@ -1,7 +1,7 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch: # 支持手动点击按钮触发编译
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,25 +16,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          channel: 'stable'
+          gradle-version: '8.7'
 
-      - name: Build APK
-        run: |
-          if [ -f "pubspec.yaml" ]; then
-            flutter pub get
-            flutter build apk --release
-          elif [ -f "gradlew" ]; then
-            chmod +x gradlew
-            ./gradlew assembleRelease
-          fi
+      - name: Build Debug APK
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: XdsRelay-APK
-          path: |
-            build/app/outputs/flutter-apk/*.apk
-            app/build/outputs/apk/release/*.apk
+          path: "**/build/outputs/apk/**/*.apk"
